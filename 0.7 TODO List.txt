@@ -1,0 +1,12 @@
+* = Done
+/ = Semi-Done
+- = Not Done/Started
+
+Better Animation System: *
+Block Breaking Takes Time: *
+More Code Organization: *
+Inventory: -
+Rewrite Player: /
+New World Format: -
+Replace All Code With Classes: /
+Add Splash Screens To Start: -
