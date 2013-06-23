@@ -20,8 +20,8 @@ buttons = {}
 			buttons.singleplayer.format.yes 	  = classes.Button:new(width/2-75-85,height/2+175,150,80,colors.defaultFore,colors.defaultBack,"YES")
 			buttons.singleplayer.format.no  	  = classes.Button:new(width/2-75+85,height/2+175,150,80,colors.defaultFore,colors.defaultBack,"NO")
 		buttons.singleplayer.generate = {}
-			buttons.singleplayer.generate.name   = classes.TextBox:new(width/2-50	,72 		 ,100,50,{255,255,255,30}  ,colors.defaultBack)
-			buttons.singleplayer.generate.seed   = classes.TextBox:new(width/2-50	,162		 ,100,50,{255,255,255,30}  ,colors.defaultBack)
+			buttons.singleplayer.generate.name   = classes.TextBox:new(width/2-50	,72 		 ,100,50,{255,255,255,30}  ,colors.defaultBack,{255,255,255,100},colors.defaultBack)
+			buttons.singleplayer.generate.seed   = classes.TextBox:new(width/2-50	,162		 ,100,50,{255,255,255,30}  ,colors.defaultBack,{255,255,255,100},colors.defaultBack)
 			buttons.singleplayer.generate.selectedbox = nil
 			buttons.singleplayer.generate.gen     = classes.Button:new(width/2-160	,height/2+175,150,50,colors.defaultFore,colors.defaultBack,"GENERATE WORLD")
 			buttons.singleplayer.generate.cancel  = classes.Button:new(width/2+10 	,height/2+175,150,50,colors.defaultFore,colors.defaultBack,"CANCEL")
@@ -134,12 +134,16 @@ function titleButtonPress(x,y,button) --Check For Button Clicks
 				elseif menu.name == "generate" then
 					if buttons.singleplayer.generate.name:clicked(x,y) then
 						buttons.singleplayer.generate.selectedbox = buttons.singleplayer.generate.name
-						buttons.singleplayer.generate.name.color = {255,255,255,100}
-						buttons.singleplayer.generate.seed.color = {255,255,255,30}
+						--buttons.singleplayer.generate.name.color = {255,255,255,100}
+						--buttons.singleplayer.generate.seed.color = {255,255,255,30}
+						buttons.singleplayer.generate.name:activate()
+						buttons.singleplayer.generate.seed:deactivate()
 					elseif buttons.singleplayer.generate.seed:clicked(x,y) then
 						buttons.singleplayer.generate.selectedbox = buttons.singleplayer.generate.seed
-						buttons.singleplayer.generate.seed.color = {255,255,255,100}
-						buttons.singleplayer.generate.name.color = {255,255,255,30}
+						--buttons.singleplayer.generate.seed.color = {255,255,255,100}
+						--buttons.singleplayer.generate.name.color = {255,255,255,30}
+						buttons.singleplayer.generate.seed:activate()
+						buttons.singleplayer.generate.name:deactivate()
 					elseif buttons.singleplayer.generate.gen:clicked(x,y) and buttons.singleplayer.generate.name:getText() ~= "" then
 						sounds.select:stop()
 						sounds.select:play()
@@ -385,6 +389,20 @@ function titleKeyPress(button,unicode)
 			buttons.singleplayer.generate.selectedbox:changeText(buttons.singleplayer.generate.selectedbox:getText()..string.char(unicode))
 		elseif unicode == 8 then
 			buttons.singleplayer.generate.selectedbox:changeText(string.sub(buttons.singleplayer.generate.selectedbox:getText(),1,-2))
+		elseif button == "tab" then
+			if buttons.singleplayer.generate.selectedbox == buttons.singleplayer.generate.name then
+				buttons.singleplayer.generate.selectedbox = buttons.singleplayer.generate.seed
+				--buttons.singleplayer.generate.seed.color = {255,255,255,100}
+				--buttons.singleplayer.generate.name.color = {255,255,255,30}
+				buttons.singleplayer.generate.seed:activate()
+				buttons.singleplayer.generate.name:deactivate()
+			else
+				buttons.singleplayer.generate.selectedbox = buttons.singleplayer.generate.name
+				--buttons.singleplayer.generate.name.color = {255,255,255,100}
+				--buttons.singleplayer.generate.seed.color = {255,255,255,30}
+				buttons.singleplayer.generate.name:activate()
+				buttons.singleplayer.generate.seed:deactivate()
+			end
 		end
 	elseif menu.name == "controls" and buttons.options.ctrls.selectedbox then
 		local text = buttons.options.ctrls.selectedbox:getText()
