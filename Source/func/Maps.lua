@@ -70,7 +70,7 @@ function drawMap()
 			if math.random(1,5000) == 2 then blockids[getBlock(x,y)].class:tick(x,y) end
 			local ypos = (y-1)*tileHeight
 			if getBlock(x,y) ~= blocks.air:getBlockID() then
-				gfx.drawq(texFile,blockids[getBlock(x,y)].class:getBlockTexture(),xpos*(scaleTileWidth/tileWidth),ypos*(scaleTileHeight/tileHeight),0,0.75)
+				gfx.drawq(texFile,blockids[getBlock(x,y)].class:getBlockTexture(),xpos*(scaleTileWidth/tileWidth),ypos*(scaleTileHeight/tileHeight),0,scaleTileWidth/tileWidth,scaleTileHeight/tileHeight)
 			end
 		end
 	end
@@ -78,8 +78,8 @@ end
 
 function newWorld(seed)
 	--Move The Cursor To Prevent Placing A Block
-	mainPlayer.cursorDown = true
-	mainPlayer:setCursorFromPixel(mse.getPosition())
+	mainPlayer:getCursor().cursorDown = true
+	mainPlayer:getCursor():setCursorFromPixel(mse.getPosition())
 	gfx.setColor(255,255,255)
 	
 	--Make A Map
@@ -120,8 +120,8 @@ function loadWorld(worldName)
 		save:close()
 		
 		--Move The Cursor To Prevent Placing A Block
-		mouseDown = true
-		mainPlayer:setCursorFromPixel(mse.getPosition())
+		mainPlayer:getCursor().cursorDown = true
+		mainPlayer:getCursor():setCursorFromPixel(mse.getPosition())
 		gfx.setColor(255,255,255)
 		
 		--Put The Game In Motion
