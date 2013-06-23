@@ -23,6 +23,10 @@ function classes.Animation:stop()
 	self.endTime = 0
 end
 
+function classes.Animation:setFrameTime(frame)
+	self.frameTime = frame
+end
+
 function classes.Animation:running()
 	return self.on
 end
