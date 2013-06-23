@@ -120,6 +120,5 @@ Dev V 0.7
 	Removed Small Delay On Closing The Game
 	Added Sound
 	New File Access Class
-	Merged The Cursor Into The Player Class
 	New Animation Class
 	Player Movement Is Now Consistent Across All Framerates
