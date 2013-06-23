@@ -18,6 +18,7 @@ classes.Player = object {
 		worldY = 13, --Y World Coordinate
 		
 		frames = nil, --Player Frame Animation Class
+		cursor = nil, --Cursor Linked With Player
 		
 		canPlayerMove = true, --Player Movement Ability
 		onGround = true, --If Player Is On The Ground
@@ -28,24 +29,7 @@ classes.Player = object {
 		leftButton = "a",
 		rightButton = "d",
 		upButton = " ",
-		joystick = false,
-		
-	--Cursor Related Variables
-		cursorDown = false, --If Block Has Been Placed
-		
-		cursorX = 1, --X Pixel Coordinate
-		cursorY = 1, --Y Pixel Coordinate
-		
-		cursorWorldX = 1, --X World Coordinate
-		cursorWorldY = 1, --Y World Coordinate
-		cursorLastX  = 1, --Previous X World Coordinate
-		cursorLastY  = 1, --Previous Y World Coordinate
-		
-		cursorOutline = gfx.newImage("gfx/select.png"), --Block Outline Image
-		blockBreaking   = false, --If A Block Is Being Broke
-		blockBreakStartTime = 0, --Time Block Started Breaking
-		blockBreakEndTime   = 0, --Time Block Will Break
-		blockBreakCurTime   = 0  --Current Time
+		joystick = false
 }
 function classes.Player:__init(lb,rb,ub,js)
 	--Initialize Player Frames 
@@ -60,6 +44,7 @@ function classes.Player:__init(lb,rb,ub,js)
 	self.frame = self.still
 	
 	self.frames = classes.Animation:new(.075) --Initializes Player Frame Animation Class
+	self.cursor = classes.Cursor:new(mainPlayer)
 	
 	--Set Controls
 	if lb then
@@ -98,10 +83,9 @@ function classes.Player:update()
 			
 			--Cursor Update
 			if not love.mouse.isVisible() then
-				self.cursorX,self.cursorY = mse.getPosition()
-				self:setCursorFromPixel(mse.getPosition())
-				
-				self:updateCursor(mse.isDown("l"),mse.isDown("r"))
+				--self.cursorX,self.cursorY = mse.getPosition()
+				self.cursor:setCursorFromPixel(mse.getPosition())
+				self.cursor:update(mse.isDown("l"),mse.isDown("r"))
 			end
 		end
 	else
@@ -124,28 +108,26 @@ function classes.Player:update()
 			
 			--Cursor Update
 			if not love.mouse.isVisible() then
-				if jst.getAxis(1,5) >=  0.5 and self.cursorX < 959 then self.cursorX = self.cursorX+2 end
-				if jst.getAxis(1,5) <= -0.5 and self.cursorX > 1 then self.cursorX = self.cursorX-2 end
-				if jst.getAxis(1,4) >=  0.5 and self.cursorY < 575 then self.cursorY = self.cursorY+2 end
-				if jst.getAxis(1,4) <= -0.5 and self.cursorY > 1 then self.cursorY = self.cursorY-2 end
-				self:setCursorFromPixel(self.cursorX,self.cursorY)
+				local newX = self.cursor:getX() --New Coordinates For Cursor Position
+				local newY = self.cursor:getY()
+				if jst.getAxis(1,5) >=  0.5 and self.cursor:getX() < 959 then newX = newX+2 end
+				if jst.getAxis(1,5) <= -0.5 and self.cursor:getX() > 1 then newX = newX-2 end
+				if jst.getAxis(1,4) >=  0.5 and self.cursor:getY() < 575 then newY = newY+2 end
+				if jst.getAxis(1,4) <= -0.5 and self.cursor:getY() > 1 then newY = newY-2 end
 				
-				self:updateCursor(jst.getAxis(1,3) >= 0.5,jst.getAxis(1,3) <= -0.5)
+				self.cursor:setCursorFromPixel(newX,newY)
+				self.cursor:update(jst.getAxis(1,3) >= 0.5,jst.getAxis(1,3) <= -0.5)
 			end
 		end
 	end
 end
 function classes.Player:draw()
 	gfx.drawq(self.picture,self.frame,self.x,self.y)
-	gfx.draw(self.cursorOutline,(self.cursorWorldX-1)*scaleTileWidth,(self.cursorWorldY-1)*scaleTileHeight)
-	if self.blockBreaking and not(self.blockBreakCurTime >= self.blockBreakEndTime) then
-		self:overlayBlockDamage(self.cursorWorldX,self.cursorWorldY,self.blockBreakCurTime-self.blockBreakStartTime,blockids[getBlock(self.cursorWorldX,self.cursorWorldY)].class:getTimeToBreak())
-	end
+	self.cursor:draw()
 	if debugon then
 		gfx.print(tostring(self.moving),5,30-12)
 		gfx.print(self.frameStartTime,5,45-12)
 		gfx.print(self.frameCurTime.."/"..self.frameEndTime,5,60-12)
-		gfx.printf("Movement: "..self.move:getTimes()--[[("Block Breaking Progress - StartTime: "..self.blockBreakStartTime.." - CurrentTime/EndTime: "..self.blockBreakCurTime.."/"..self.blockBreakEndTime]],5,105-12,width,"left") --Show Progress Towards Breaking The Next Block
 	end
 end
 
@@ -211,105 +193,8 @@ function classes.Player:updateControls(lb,rb,ub,js)
 	self.joystick = js
 end
 
---Cursor Functions
-function classes.Player:updateCursor(ld,rd)
-	if self.cursorDown and not ld then
-		self.cursorDown = false
-	end
-	
-	if ld then
-		if getBlock(self.cursorWorldX,self.cursorWorldY) ~= blocks.stone:getBlockID() and self.cursorDown == false then
-			setBlock(self.cursorWorldX,self.cursorWorldY,blocks.stone:getBlockID())
-			self.cursorDown = true
-			self.cursorLastX = self.cursorWorldX
-			self.cursorLastY = self.cursorWorldY
-		elseif getBlock(self.cursorWorldX,self.cursorWorldY) == blocks.stone:getBlockID() and self.cursorDown == false then
-			setBlock(self.cursorWorldX,self.cursorWorldY,blocks.dirt:getBlockID())
-			self.cursorDown = true
-			self.cursorLastX = self.cursorWorldX
-			self.cursorLastY = self.cursorWorldY
-		elseif getBlock(self.cursorWorldX,self.cursorWorldY) == blocks.air:getBlockID() and self.cursorDown == false then
-			setBlock(self.cursorWorldX,self.cursorWorldY,blocks.dirt:getBlockID())
-			self.cursorDown = true
-			self.cursorLastX = self.cursorWorldX
-			self.cursorLastY = self.cursorWorldY
-		end
-		
-		if  self.cursorDown then
-			if self.cursorWorldX ~= self.cursorLastX or self.cursorWorldY ~= self.cursorLastY then
-				 self.cursorDown = false
-			end
-		end
-	end
-	
-	if rd then
-		if self.blockBreaking == false then
-			if getBlock(self.cursorWorldX,self.cursorWorldY) ~= blocks.air:getBlockID() then
-				self.blockBreaking = true
-				self.blockBreakStartTime = love.timer.getTime()
-				self.blockBreakEndTime = self.blockBreakStartTime + blockids[getBlock(self.cursorWorldX,self.cursorWorldY)].class:getTimeToBreak()
-				self.blockBreakCurTime = self.blockBreakStartTime
-			end
-		end
-		if self.blockBreaking then
-			if self.blockBreakCurTime >= self.blockBreakEndTime then
-				self.blockBreaking = false
-				self.blockBreakStartTime = 0
-				self.blockBreakEndTime = 0
-				self.blockBreakCurTime = 0
-				setBlock(self.cursorWorldX,self.cursorWorldY,blocks.air:getBlockID())
-			else
-				self.blockBreakCurTime = love.timer.getTime()
-			end
-		end
-		if self.cursorLastX ~= self.cursorWorldX or self.cursorLastY ~= self.cursorWorldY then
-			self.blockBreaking = false
-			self.blockBreakStartTime = 0
-			self.blockBreakEndTime = 0
-			self.blockBreakCurTime = 0
-		end
-	else
-		self.blockBreaking = false
-		self.blockBreakStartTime = 0
-		self.blockBreakEndTime = 0
-		self.blockBreakCurTime = 0
-	end
-end
-
-function classes.Player:setCursorFromPixel(x,y) --Set The Cursor's Position From A Specific Pixel
-	if x > 0 and y > 0 and x < 961 and y < 577 then
-		self:setCursorXFromPixel(x)
-		self:setCursorYFromPixel(y)
-	end
-end
-function classes.Player:setCursorXFromPixel(x) --Set The Cursor's X Posistion From A Specific Pixel
-	self.cursorLastX = self.cursorWorldX
-	self.cursorWorldX = math.ceil(x/24)
-end
-function classes.Player:setCursorYFromPixel(y) --Set The Cursor's Y Posistion From A Specific Pixel
-	self.cursorLastY = self.cursorWorldY
-	self.cursorWorldY = math.ceil(y/24)
-end
-
-function classes.Player:setCursorFromTile(x,y) --Set The Cursor's Posistion From A World Coordinate
-	self:setCursorXFromTile(x)
-	self:setCursorYFromTile(y)
-end
-function classes.Player:setCursorXFromTile(x) --Set The Cursor's X Posistion From A World Coordinate
-	self.cursrorLastX = self.cursorWorldX
-	self.cursorWorldX = x
-end
-function classes.Player:setCursorYFromTile(y) --Set The Cursor's Y Posistion From A World Coordinate
-	self.cursorLastY = self.cursorWorldY
-	self.cursorWorldY = y
-end
-
-function classes.Player:overlayBlockDamage(x,y,curTime,breakTime) --Temporary Code For Block Breaking
-	local increment = breakTime/8 --Get The Amount Of Time Between Each Damage Stage
-	local stage = math.floor(curTime/increment) --Get What Stage Of Damage The Block Is On
-	local overlay = gfx.newQuad(((379+stage)%(texFile:getWidth()/tileWidth))*tileWidth,math.floor((379+stage)/(texFile:getHeight()/tileHeight))*tileHeight,tileWidth,tileHeight,texFile:getWidth(),texFile:getHeight())
-	
-	gfx.drawq(texFile,overlay,((x-1)*tileWidth)*0.75,((y-1)*tileHeight)*0.75,0,0.75)
+function classes.Player:getCursor()
+	return self.cursor
 end
 
 mainPlayer = classes.Player:new(controls.left,controls.right,controls.jump,controls.gamepad)
