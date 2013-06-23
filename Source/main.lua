@@ -9,6 +9,7 @@ function love.load()
 
 	--Load Classes
 	require("class/Animation")
+	require("class/Cursor")
 	require("class/GenMinable")
 	require("class/Block")
 	require("class/Player")
