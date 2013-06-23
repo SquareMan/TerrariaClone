@@ -16,7 +16,7 @@ function classes.Box:__init(x,y,width,height,color,outColor)
 	self.outColor = outColor
 end
 function classes.Box:draw()
-	tmpr,tmpg,tmpb = gfx.getColor()
+	local tmpr,tmpg,tmpb = gfx.getColor()
 	gfx.setColor(self.color)
 	gfx.rectangle("fill",self.x,self.y,self.width,self.height)
 	gfx.setColor(self.outColor)
@@ -29,21 +29,33 @@ end
 
 --Text Box Class
 classes.TextBox = classes.Box:extends {
-	text = ""
+	text = "",
+	active = false
 }
-function classes.TextBox:__init(x,y,width,height,color,outColor)
+function classes.TextBox:__init(x,y,width,height,color,outColor,activeColor,activeOutColor)
 	self.x = x
 	self.y = y
 	self.width = width
 	self.height = height
 	self.color = color
 	self.outColor = outColor
+	self.activeColor = activeColor
+	self.activeOutColor = activeOutColor
+	self.active = false
 end
 function classes.TextBox:draw()
-	tmpr,tmpg,tmpb = gfx.getColor()
-	gfx.setColor(self.color)
+	local tmpr,tmpg,tmpb = gfx.getColor()
+	if not self.active then
+		gfx.setColor(self.color)
+	else
+		gfx.setColor(self.activeColor)
+	end
 	gfx.rectangle("fill",self.x,self.y,self.width,self.height)
-	gfx.setColor(self.outColor)
+	if self.active then
+		gfx.setColor(self.outColor)
+	else
+		gfx.setColor(self.activeOutColor)
+	end
 	gfx.rectangle("line",self.x,self.y,self.width,self.height)
 	gfx.printf(self.text,self.x,(self.y+self.height/2)-gfx.getFont():getHeight()/2,self.width,"center")
 	gfx.setColor(tmpr,tmpb,tmpg)
@@ -59,6 +71,15 @@ function classes.TextBox:clicked(mx,my)
 		return true
 	end
 	return false
+end
+function classes.TextBox:activate()
+	self.active = true
+end
+function classes.TextBox:deactivate()
+	self.active = false
+end
+function classes.TextBox:toggleActive()
+	self.active = not self.active
 end
 
 --Button Class
@@ -77,7 +98,7 @@ function classes.Button:__init(x,y,width,height,color,outColor,text)
 	self.text = text
 end
 function classes.Button:draw()
-	tmpr,tmpg,tmpb = gfx.getColor()
+	local tmpr,tmpg,tmpb = gfx.getColor()
 	gfx.setColor(self.color)
 	gfx.rectangle("fill",self.x,self.y,self.width,self.height)
 	gfx.setColor(self.outColor)
