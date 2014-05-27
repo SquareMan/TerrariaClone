@@ -1,7 +1,7 @@
-Terraria Clone
+OpenTerra
 ==============
 
-A game based of the popular game Terraria.
-When finished it will have many features of Terraria and more.
-Full modding support will be Implemented.
-Currently being coded in the Love2D framework.
+This game is another 2D open-world game like Starbound or Terraria.<br />
+I'm making it because I can.<br />
+It will be open-source, so you can hack away at it to your heart's content.<br />
+Send any questions, comments, or concerns to "stingerbarb@gmail.com".<br >
